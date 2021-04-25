@@ -4,8 +4,8 @@ export class DatabaseConnectionError extends CustomError {
     reason = 'Database Error'
 
     statusCode = 500 
-    constructor( ) {
-        super()
+    constructor() {
+        super('Database Error')
         Object.setPrototypeOf(this, DatabaseConnectionError.prototype)
     }
 

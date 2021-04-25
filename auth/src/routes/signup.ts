@@ -1,31 +1,37 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
+import { User } from '../models'
+import { alreadyExists, dataIsValid, userDataValidator } from '../validators'
 import * as Err from '../errors'
 
 const route = express.Router()
 
-route.post('/api/users/signUp', [
-    body('email')
-        .isEmail()
-        .withMessage('Invalid email'),
-    body('password')
-        .isLength({ min: 4, max: 20 })
-        .withMessage('Password must be 4 to 20 characters')
+route.post('/api/users/signUp',userDataValidator, async ( req: express.Request, res: express.Response ) => {
+   
+    await dataIsValid(req)
 
-], ( req: express.Request, res: express.Response ) => {
-    const errors = validationResult(req)
+    const { email, password } = req.body
 
-    if (!errors.isEmpty()) {
-        throw new Err.RequestValidationError(errors.array())
+    const userExists = await alreadyExists( User, {email})
+
+    console.log( userExists )
 
 
+    const existingUser = await User.findOne({ email })
+
+    if (existingUser) {
+        console.log('Email in use')
+        return res.status(400).json({message: 'Email in use'})
     }
 
-    console.log('Creating user...')
-    throw new Err.DatabaseConnectionError()
+    const user = User.build({ email, password })
+    await user.save()
+            .then(user => res.status(201).json({ user }))
+            .catch(e => res.status(400).json({message: 'Oopsie poopsie'})
+    
 
-        res.status(200).json({ message: 'signup user'})
 
+    ) 
 })
 
 export { route as signUpRoute }
