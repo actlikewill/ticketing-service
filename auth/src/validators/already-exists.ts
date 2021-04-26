@@ -8,5 +8,5 @@ export const alreadyExists = (model: any, field:any) =>
        if (value) {
             reject(new BadRequestError('Already Exists'))
        } 
-           resolve(value) 
+           resolve(false) 
     })

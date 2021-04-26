@@ -1,37 +1,33 @@
 import express from 'express'
-import { body, validationResult } from 'express-validator'
 import { User } from '../models'
 import { alreadyExists, dataIsValid, userDataValidator } from '../validators'
-import * as Err from '../errors'
+import { BadRequestError } from '../errors/bad-request-error'
+import jwt from 'jsonwebtoken'
 
 const route = express.Router()
 
-route.post('/api/users/signUp',userDataValidator, async ( req: express.Request, res: express.Response ) => {
-   
-    await dataIsValid(req)
+route.post('/api/users/signUp', userDataValidator, async ( req: express.Request, res: express.Response ) => {
+    const { email, password } = req.body 
 
-    const { email, password } = req.body
-
-    const userExists = await alreadyExists( User, {email})
-
-    console.log( userExists )
-
-
-    const existingUser = await User.findOne({ email })
-
-    if (existingUser) {
-        console.log('Email in use')
-        return res.status(400).json({message: 'Email in use'})
-    }
+   if ( (await dataIsValid(req)) && ( ! await alreadyExists( User, {email} ) ) ) {
 
     const user = User.build({ email, password })
     await user.save()
-            .then(user => res.status(201).json({ user }))
-            .catch(e => res.status(400).json({message: 'Oopsie poopsie'})
-    
 
+    const userJwt = jwt.sign({
+        id: user.id,
+        email: user.email
+    }, process.env.JWT_KEY!)
 
-    ) 
+    req.session = {
+        jwt: userJwt
+    }
+
+    return res.status(201).json({ user })
+
+   } 
+   
+   throw new BadRequestError('Something Went Wrong')
 })
 
 export { route as signUpRoute }

@@ -5,6 +5,8 @@ export const userDataValidator = [
         .isEmail()
         .withMessage('Invalid email'),
     body('password')
+        .trim()
+        .notEmpty()
         .isLength({ min: 4, max: 20 })
         .withMessage('Password must be 4 to 20 characters')
 
