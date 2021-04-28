@@ -1,9 +1,10 @@
 import express from 'express'
-
+import { currentUser } from '../middleware'
 const route = express.Router()
 
-route.post('/api/users/currentuser', ( req, res ) => {
-    res.status(200).json({ message: 'current user'})
+route.get('/api/users/currentuser', currentUser, ( req, res ) => {
+  
+        return res.status(200).json({ currentUser: req.currentUser || null })
 
 })
 

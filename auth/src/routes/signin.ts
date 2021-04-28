@@ -1,20 +1,39 @@
 import express from 'express'
 import { BadRequestError } from '../errors/bad-request-error'
-import { dataIsValid, userDataValidator } from '../validators'
+import { validateRequestData } from '../middleware'
+import { User, UserDocument } from '../models'
+import { Password } from '../services'
+import { alreadyExists as existingUser, userDataValidator } from '../validators'
+import jwt from 'jsonwebtoken'
 
 const route = express.Router()
 
-route.post('/api/users/signin', userDataValidator, async ( req: express.Request, res: express.Response) => {
+route.post('/api/users/signin', userDataValidator, validateRequestData, async ( req: express.Request, res: express.Response) => {
+    const { email, password } = req.body
 
-    if ( await dataIsValid(req) ) {
+    const user : UserDocument = await existingUser ( User, {email} )
 
-        return res.status(200).json({ message: 'login user'})
-
+    if ( ! user ) {
+        throw new BadRequestError("Invalid Credentials")
+    }
+    
+    const passwordMatch = await Password.compare( user.password, password)
+    
+    if ( ! passwordMatch ) {
+        throw new BadRequestError("Invalid Credentials")
     }
 
-    throw new BadRequestError('Sign in failed.')
+    const userJwt = jwt.sign({
+        id: user.id,
+        email: user.email
+    }, process.env.JWT_KEY!)
+
+    req.session = {
+        jwt: userJwt
+    }
+
+    return res.status(200).json({user: user})
 
 })
 
 export { route as signInRoute }
-

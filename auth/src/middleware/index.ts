@@ -1,10 +1,5 @@
-// export * from './errorHandler'
-// export * from './notFoundHandler'
-
-const path = require('path')
-const testFolder = path.resolve(__dirname, './')
-const fs = require('fs');
-
-fs.readdirSync(testFolder).forEach((file: any) => {
-    require(file)
-});
+export * from './errorHandler'
+export * from './notFoundHandler'
+export * from './request-data-validator'
+export * from './currentuser'
+export * from './require-auth'

@@ -3,13 +3,16 @@ import { User } from '../models'
 import { alreadyExists, dataIsValid, userDataValidator } from '../validators'
 import { BadRequestError } from '../errors/bad-request-error'
 import jwt from 'jsonwebtoken'
+import { validateRequestData } from '../middleware/request-data-validator'
 
 const route = express.Router()
 
-route.post('/api/users/signUp', userDataValidator, async ( req: express.Request, res: express.Response ) => {
+route.post('/api/users/signup', userDataValidator, validateRequestData, async ( req: express.Request, res: express.Response ) => {
     const { email, password } = req.body 
 
-   if ( (await dataIsValid(req)) && ( ! await alreadyExists( User, {email} ) ) ) {
+   if  ( await alreadyExists( User, {email} )  ) {
+       throw new BadRequestError('Already Exists')
+   }
 
     const user = User.build({ email, password })
     await user.save()
@@ -24,10 +27,8 @@ route.post('/api/users/signUp', userDataValidator, async ( req: express.Request,
     }
 
     return res.status(201).json({ user })
-
-   } 
    
-   throw new BadRequestError('Something Went Wrong')
 })
 
 export { route as signUpRoute }
+
