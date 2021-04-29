@@ -11,8 +11,6 @@ export const errorHandler : ErrorRequestHandler = ( err, req, res, next ) => {
 
     }
 
-
-
     res.status(500).json({
         errors: [{message: 'Server Error', trace: JSON.stringify(err.stack)}] })
 

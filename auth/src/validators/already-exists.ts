@@ -1,5 +1,4 @@
-import { BadRequestError } from "../errors/bad-request-error"
-import mongoose from 'mongoose'
+
 
 export const alreadyExists = (model: any, field:any): Promise<any | null> =>
     new Promise(async ( resolve, reject ) => { 

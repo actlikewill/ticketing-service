@@ -1,6 +1,6 @@
 import express from 'express'
 import { User } from '../models'
-import { alreadyExists, dataIsValid, userDataValidator } from '../validators'
+import { alreadyExists, userDataValidator } from '../validators'
 import { BadRequestError } from '../errors/bad-request-error'
 import jwt from 'jsonwebtoken'
 import { validateRequestData } from '../middleware/request-data-validator'
